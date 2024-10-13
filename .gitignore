@@ -162,4 +162,4 @@ cython_debug/
 #.idea/
 kidney/
 research\kidney-CT-Scan-data.zip
-artifacts/
+artifacts/*
