@@ -3,7 +3,8 @@ from cnnClassifier.utils.utils import read_yaml, create_directories
 from cnnClassifier.exception import CustomException
 import sys
 from cnnClassifier.logger import logger
-from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig
+from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig
+import os
 
 class ConfigurationManager:
     
@@ -72,6 +73,25 @@ class ConfigurationManager:
 
         
     def get_prepare_base_model(self) -> PrepareBaseModelConfig:
+        """
+        Retrieves and sets up the base model preparation configuration.
+
+        Reads the base model preparation settings from the configuration file and creates
+        necessary directories for storing the model files. Returns a PrepareBaseModelConfig
+        object that includes paths and parameters for preparing the base model.
+
+        Returns:
+            PrepareBaseModelConfig: An object containing configurations for base model
+                                    preparation, such as paths for saving the base model 
+                                    and updated model, and training parameters like image size, 
+                                    number of classes, and learning rate.
+
+        Raises:
+            CustomException: If there is an error while creating directories or accessing 
+                             configuration parameters.
+        """
+        
+        
         config = self.config.prepare_base_model
         
         create_directories([config.root_dir])
@@ -88,4 +108,46 @@ class ConfigurationManager:
         )
         
         return prepare_base_model_config
+    
+    def get_training_config(self) -> TrainingConfig:
+        """
+        Retrieves and sets up the training configuration.
+    
+        Reads the training settings from the configuration file and creates the necessary
+        directories for storing training results. It also sets up paths for training data 
+        and the base model. Returns a TrainingConfig object that includes paths and parameters
+        for model training.
+    
+        Returns:
+            TrainingConfig: An object containing configurations for training the model,
+                            such as paths for the trained model, updated base model, training
+                            data, number of epochs, batch size, data augmentation flag, 
+                            and image size.
+    
+        Raises:
+            CustomException: If there is an error while creating directories or accessing 
+                             configuration parameters.
+        """
+            
+        
+        training = self.config.training
+        prepare_base_model = self.config.prepare_base_model
+        params = self.params
+        training_data = os.path.join(self.config.data_ingestion.unzip_dir, "kidney-ct-scan-image")
+        create_directories([
+            Path(training.root_dir)
+        ])
+        
+        training_config = TrainingConfig(
+            root_dir = Path(training.root_dir),
+            trained_model_path=Path(training.trained_model_path),
+            updated_base_model_path=Path(prepare_base_model.updated_base_model_path),
+            training_data = Path(training_data),
+            params_epochs=params.EPOCHS,
+            params_batch_size=params.BATCH_SIZE,
+            params_is_augmentation=params.AUGMENTATION,
+            params_image_size=params.IMAGE_SIZE
+        )
+        
+        return training_config
         
