@@ -3,7 +3,7 @@ from cnnClassifier.utils.utils import read_yaml, create_directories
 from cnnClassifier.exception import CustomException
 import sys
 from cnnClassifier.logger import logger
-from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig
+from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig, EvaluationConfig
 import os
 
 class ConfigurationManager:
@@ -112,23 +112,23 @@ class ConfigurationManager:
     def get_training_config(self) -> TrainingConfig:
         """
         Retrieves and sets up the training configuration.
-    
+
         Reads the training settings from the configuration file and creates the necessary
         directories for storing training results. It also sets up paths for training data 
         and the base model. Returns a TrainingConfig object that includes paths and parameters
         for model training.
-    
+
         Returns:
             TrainingConfig: An object containing configurations for training the model,
                             such as paths for the trained model, updated base model, training
                             data, number of epochs, batch size, data augmentation flag, 
                             and image size.
-    
+
         Raises:
             CustomException: If there is an error while creating directories or accessing 
                              configuration parameters.
         """
-            
+
         
         training = self.config.training
         prepare_base_model = self.config.prepare_base_model
@@ -150,4 +150,35 @@ class ConfigurationManager:
         )
         
         return training_config
+    
+    def get_evaluation_config(self) -> EvaluationConfig:
+        """
+    Prepares and returns the evaluation configuration.
+
+    This method sets up the configuration required for model evaluation. It specifies 
+    paths to the trained model and training data, as well as details necessary for 
+    connecting to the MLflow tracking server. It also retrieves essential parameters 
+    such as image size and batch size for the evaluation process.
+
+    Returns:
+        EvaluationConfig: A data class containing all evaluation configuration settings, 
+        including:
+            - path_of_model (str): Path to the trained model file.
+            - training_data (str): Path to the directory containing training data.
+            - mlflow_uri (str): The URI for connecting to the MLflow tracking server.
+            - all_params (ConfigBox): Contains all parameters from the params file.
+            - params_image_size (tuple): Image size parameter for evaluation.
+            - params_batch_size (int): Batch size parameter for evaluation.
+    """
+        eval_config = EvaluationConfig(
+            path_of_model="artifacts/training/model.h5",
+            training_data="artifacts/data_ingestion/kidney-ct-scan-image",
+            mlflow_uri="https://dagshub.com/asadalipuh5/Kidney-Decease-Classification-End-to-End-MLflow-DVC.mlflow",
+            all_params=self.params,
+            params_image_size=self.params.IMAGE_SIZE,
+            params_batch_size=self.params.BATCH_SIZE
+        )
+
+        return eval_config
+
         
