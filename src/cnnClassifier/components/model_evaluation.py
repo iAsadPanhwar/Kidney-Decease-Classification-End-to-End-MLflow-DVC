@@ -5,6 +5,12 @@ import mlflow.keras
 from urllib.parse import urlparse
 from cnnClassifier.entity.config_entity import EvaluationConfig
 from cnnClassifier.utils.utils import read_yaml, create_directories, save_json
+import dagshub
+import os
+
+os.environ['MLFLOW_TRACKING_URI'] = 'https://dagshub.com/asadalipuh5/Kidney-Decease-Classification-End-to-End-MLflow-DVC.mlflow'
+os.environ['MLFLOW_TRACKING_USERNAME']='asadalipuh5'
+os.environ['MLFLOW_TRACKING_PASSWORD']='c38aa13a560b068b1a29fd9078b8062b6b7845dc'
 
 class Evaluation:
     def __init__(self, config: EvaluationConfig):
@@ -52,6 +58,8 @@ class Evaluation:
         save_json(path=Path("scores.json"), data=scores)
         
     def log_into_mlflow(self):
+        
+        dagshub.init(repo_owner='asadalipuh5', repo_name='Kidney-Decease-Classification-End-to-End-MLflow-DVC', mlflow=True)
         mlflow.set_registry_uri(self.config.mlflow_uri)
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         
@@ -61,6 +69,8 @@ class Evaluation:
                 {"loss": self.score[0], "accuracy": self.score[1]}
             )
             # Model registry does not work with file store
+            print(f"Environment Variables: {os.environ.get('MLFLOW_TRACKING_USERNAME')}")
+            
             if tracking_url_type_store != "file":
 
                 # Register the model
